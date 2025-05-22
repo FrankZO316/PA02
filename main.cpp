@@ -20,63 +20,55 @@ using namespace std;
 
 bool parseLine(string &line, string &movieName, double &movieRating);
 
-int main(int argc, char** argv){
-    if (argc < 2){
+int main(int argc, char** argv) {
+    if (argc < 2) {
         cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
-        cerr << "Usage: " << argv[ 0 ] << " moviesFilename prefixFilename " << endl;
+        cerr << "Usage: " << argv[0] << " moviesFilename prefixFilename " << endl;
         exit(1);
     }
 
-    ifstream movieFile (argv[1]);
- 
-    if (movieFile.fail()){
+    ifstream movieFile(argv[1]);
+    if (movieFile.fail()) {
         cerr << "Could not open file " << argv[1];
         exit(1);
     }
-  
-    // Create an object of a STL data-structure to store all the movies
+
     vector<Movie> movies;
     string line, movieName;
     double movieRating;
-    // Read each file and store the name and rating
-    while (getline (movieFile, line) && parseLine(line, movieName, movieRating)){
-            movies.emplace_back(movieName, movieRating);// Use std::string movieName and double movieRating
-            // to construct your Movie objects
-            // cout << movieName << " has rating " << movieRating << endl;
-            // insert elements into your data structure
+
+    while (getline(movieFile, line) && parseLine(line, movieName, movieRating)) {
+        movies.emplace_back(movieName, movieRating);
     }
 
     movieFile.close();
     sort(movies.begin(), movies.end(), [](const Movie& a, const Movie& b) {
         return a.name < b.name;
     });
-    if (argc == 2){
-            for (const Movie& m : movies) {
+
+    if (argc == 2) {
+        for (const Movie& m : movies) {
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-        }//print all the movies in ascending alphabetical order of movie names
-            return 0;
+        }
+        return 0;
     }
 
-    ifstream prefixFile (argv[2]);
-
+    ifstream prefixFile(argv[2]);
     if (prefixFile.fail()) {
         cerr << "Could not open file " << argv[2];
         exit(1);
     }
 
     vector<string> prefixes;
-    while (getline (prefixFile, line)) {
+    while (getline(prefixFile, line)) {
         if (!line.empty()) {
             prefixes.push_back(line);
         }
     }
 
-    //  For each prefix,
-    //  Find all movies that have that prefix and store them in an appropriate data structure
-    //  If no movie with that prefix exists print the following message
+    // Process each prefix in a single pass
     for (const string& prefix : prefixes) {
         vector<Movie> matches;
-        
         auto lower = lower_bound(movies.begin(), movies.end(), prefix,
             [](const Movie& m, const string& p) {
                 return m.name.compare(0, p.length(), p) < 0;
@@ -91,41 +83,19 @@ int main(int argc, char** argv){
         if (matches.empty()) {
             cout << "No movies found with prefix " << prefix << endl;
         } else {
+            // Sort matches by rating and name
             sort(matches.begin(), matches.end(),
                 [](const Movie& a, const Movie& b) {
                     if (a.rating != b.rating) return a.rating > b.rating;
                     return a.name < b.name;
                 });
 
+            // Print all matches
             for (const Movie& m : matches) {
                 cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
-        }
-    }
 
-    //  For each prefix,
-    //  Print the highest rated movie with that prefix if it exists.
-    for (const string& prefix : prefixes) {
-        vector<Movie> matches;
-        
-        auto lower = lower_bound(movies.begin(), movies.end(), prefix,
-            [](const Movie& m, const string& p) {
-                return m.name.compare(0, p.length(), p) < 0;
-            });
-        auto upper = upper_bound(movies.begin(), movies.end(), prefix,
-            [](const string& p, const Movie& m) {
-                return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
-            });
-
-        matches.assign(lower, upper);
-
-        if (!matches.empty()) {
-            sort(matches.begin(), matches.end(),
-                [](const Movie& a, const Movie& b) {
-                    if (a.rating != b.rating) return a.rating > b.rating;
-                    return a.name < b.name;
-                });
-
+            // Print best movie immediately after matches
             cout << "Best movie with prefix " << prefix << " is: " 
                  << matches[0].name << " with rating " 
                  << fixed << setprecision(1) << matches[0].rating << endl;
