@@ -74,40 +74,63 @@ int main(int argc, char** argv){
             prefixes.push_back(line);
         }
     }
-     vector<Movie> bestMovies;
+    vector<Movie> bestMovies;
     vector<bool> hasMovies;
 
-    for (const string& prefix : prefixes) {
-        auto lower = lower_bound(movies.begin(), movies.end(), prefix, [&](const Movie& m, const string& p) {
-            return m.name.substr(0, p.length()) < p;
-        });
-        auto upper = upper_bound(movies.begin(), movies.end(), prefix, [&](const string& p, const Movie& m) {
-            return p < m.name.substr(0, p.length());
-        });
+     for (const string& prefix : prefixes) {
+        vector<Movie> matches;
+        
+        auto lower = lower_bound(movies.begin(), movies.end(), prefix,
+            [](const Movie& m, const string& p) {
+                return m.name.compare(0, p.length(), p) < 0;
+            });
+        auto upper = upper_bound(movies.begin(), movies.end(), prefix,
+            [](const string& p, const Movie& m) {
+                return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
+            });
 
-        vector<Movie> matches(lower, upper);
+        matches.assign(lower, upper);
+
         if (matches.empty()) {
             cout << "No movies found with prefix " << prefix << endl;
-            bestMovies.emplace_back("", -1.0);
-            hasMovies.push_back(false);
         } else {
-            sort(matches.begin(), matches.end(), [](const Movie& a, const Movie& b) {
-                if (a.rating != b.rating) return a.rating > b.rating;
-                return a.name < b.name;
-            });
+            sort(matches.begin(), matches.end(),
+                [](const Movie& a, const Movie& b) {
+                    if (a.rating != b.rating) return a.rating > b.rating;
+                    return a.name < b.name;
+                });
+
+            
             for (const Movie& m : matches) {
                 cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
-            cout << endl;
-            bestMovies.push_back(matches.front());
-            hasMovies.push_back(true);
         }
     }
 
-    for (size_t i = 0; i < prefixes.size(); ++i) {
-        if (hasMovies[i]) {
-            cout << "Best movie with prefix " << prefixes[i] << " is: " << bestMovies[i].name
-                 << " with rating " << fixed << setprecision(1) << bestMovies[i].rating << endl;
+    for (const string& prefix : prefixes) {
+        vector<Movie> matches;
+        
+        auto lower = lower_bound(movies.begin(), movies.end(), prefix,
+            [](const Movie& m, const string& p) {
+                return m.name.compare(0, p.length(), p) < 0;
+            });
+        auto upper = upper_bound(movies.begin(), movies.end(), prefix,
+            [](const string& p, const Movie& m) {
+                return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
+            });
+
+        matches.assign(lower, upper);
+
+        if (!matches.empty()) {
+            sort(matches.begin(), matches.end(),
+                [](const Movie& a, const Movie& b) {
+                    if (a.rating != b.rating) return a.rating > b.rating;
+                    return a.name < b.name;
+                });
+
+            cout << "Best movie with prefix " << prefix << " is: " 
+                 << matches[0].name << " with rating " 
+                 << fixed << setprecision(1) << matches[0].rating << endl;
         }
     }
 
