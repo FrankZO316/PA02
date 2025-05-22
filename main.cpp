@@ -19,11 +19,6 @@ using namespace std;
 #include "movies.h"
 
 bool parseLine(string &line, string &movieName, double &movieRating);
-struct Movie {
-    string name;
-    double rating;
-    Movie(string n, double r) : name(n), rating(r) {}
-};
 int main(int argc, char** argv){
     if (argc < 2){
         cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
