@@ -19,6 +19,7 @@ using namespace std;
 #include "movies.h"
 
 bool parseLine(string &line, string &movieName, double &movieRating);
+
 int main(int argc, char** argv){
     if (argc < 2){
         cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
@@ -69,10 +70,11 @@ int main(int argc, char** argv){
             prefixes.push_back(line);
         }
     }
-    vector<Movie> bestMovies;
-    vector<bool> hasMovies;
 
-     for (const string& prefix : prefixes) {
+    //  For each prefix,
+    //  Find all movies that have that prefix and store them in an appropriate data structure
+    //  If no movie with that prefix exists print the following message
+    for (const string& prefix : prefixes) {
         vector<Movie> matches;
         
         auto lower = lower_bound(movies.begin(), movies.end(), prefix,
@@ -95,13 +97,14 @@ int main(int argc, char** argv){
                     return a.name < b.name;
                 });
 
-            
             for (const Movie& m : matches) {
                 cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
         }
     }
 
+    //  For each prefix,
+    //  Print the highest rated movie with that prefix if it exists.
     for (const string& prefix : prefixes) {
         vector<Movie> matches;
         
