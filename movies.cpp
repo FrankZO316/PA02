@@ -13,25 +13,30 @@ void Movies::sortMovies() {
 
 std::vector<Movie> Movies::getMoviesByPrefix(const std::string& prefix) const {
     std::vector<Movie> result;
+    // Find lower bound (first movie >= prefix)
     auto lower = std::lower_bound(movies.begin(), movies.end(), prefix,
         [](const Movie& m, const std::string& p) {
-            return m.name.compare(0, p.size(), p) < 0;
+            return m.name.substr(0, p.size()) < p;
         });
+    // Find upper bound (first movie > prefix)
     auto upper = std::upper_bound(movies.begin(), movies.end(), prefix,
         [](const std::string& p, const Movie& m) {
-            return m.name.compare(0, p.size(), p) > 0;
+            return p < m.name.substr(0, p.size());
         });
     result.assign(lower, upper);
-    std::sort(result.begin(), result.end(), [](const Movie& a, const Movie& b) {
-        if (a.rating != b.rating) return a.rating > b.rating;
-        return a.name < b.name;
-    });
     return result;
 }
 
 Movie Movies::findBestMovie(const std::string& prefix) const {
     auto matches = getMoviesByPrefix(prefix);
-    return matches.empty() ? Movie{"", -1.0} : matches.front();
+    if (matches.empty()) return {"", -1.0};
+    
+    // Single-pass to find max-rated movie
+    return *std::max_element(matches.begin(), matches.end(),
+        [](const Movie& a, const Movie& b) {
+            return (a.rating < b.rating) || 
+                   (a.rating == b.rating && a.name > b.name);
+        });
 }
 
 const std::vector<Movie>& Movies::getMoviesList() const {
