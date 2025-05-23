@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
         matches.assign(lower, upper);
 
         if (matches.empty()) {
-            cout << "No movies found with prefix " << prefix << endl;
+            cout << "No movies found with prefix " << prefix;
             hasMatches.push_back(false);
             bestMovies.emplace_back("", -1);
         } else {
