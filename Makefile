@@ -1,19 +1,15 @@
-CXX = g++
-CXXFLAGS = -std=c++20 -Ofast -Wall -Wextra
+CXX_FLAGS = -std=c++20 -Ofast
 
 all: runMovies
 
-runMovies: movies.o utilities.o main.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
+runMovies: movies.o utilities.o main.cpp
+	g++ $(CXX_FLAGS) -o runMovies movies.o utilities.o main.cpp
 
-main.o: main.cpp movies.h utilities.h
-	$(CXX) $(CXXFLAGS) -c main.cpp
+movies.o: movies.h movies.cpp 
+	g++ -c $(CXX_FLAGS) movies.cpp
 
-movies.o: movies.cpp movies.h
-	$(CXX) $(CXXFLAGS) -c movies.cpp
-
-utilities.o: utilities.cpp utilities.h
-	$(CXX) $(CXXFLAGS) -c utilities.cpp
+utilities.o: utilities.h utilities.cpp 
+	g++ -c $(CXX_FLAGS) utilities.cpp
 
 clean:
 	rm -f *.o
