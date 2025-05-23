@@ -23,7 +23,7 @@ bool parseLine(string &line, string &movieName, double &movieRating);
 int main(int argc, char** argv) {
     if (argc < 2) {
         cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
-        cerr << "Usage: " << argv[0] << " moviesFilename prefixFilename " << endl;
+        cerr << "Usage: " << argv[0] << " moviesFilename [prefixFilename]" << endl;
         exit(1);
     }
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Process each prefix in a single pass
+    // Process each prefix in order
     for (const string& prefix : prefixes) {
         vector<Movie> matches;
         auto lower = lower_bound(movies.begin(), movies.end(), prefix,
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
         if (matches.empty()) {
             cout << "No movies found with prefix " << prefix << endl;
         } else {
-            // Sort matches by rating and name
+            // Sort matches by rating (desc) and name (asc)
             sort(matches.begin(), matches.end(),
                 [](const Movie& a, const Movie& b) {
                     if (a.rating != b.rating) return a.rating > b.rating;
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
                 cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
 
-            // Print best movie immediately after matches
+            // Print best movie immediately after matches for this prefix
             cout << "Best movie with prefix " << prefix << " is: " 
                  << matches[0].name << " with rating " 
                  << fixed << setprecision(1) << matches[0].rating << endl;
@@ -130,11 +130,16 @@ for output and highest-rated movie selection. Space usage is kept
 linear with input size, acceptable for large datasets.*/
 
 bool parseLine(string &line, string &movieName, double &movieRating) {
-    int commaIndex = line.find_last_of(",");
-    movieName = line.substr(0, commaIndex);
-    movieRating = stod(line.substr(commaIndex+1));
-    if (movieName[0] == '\"') {
-        movieName = movieName.substr(1, movieName.length() - 2);
+    size_t comma = line.find_last_of(',');
+    if (comma == string::npos) return false;
+    movieName = line.substr(0, comma);
+    try {
+        movieRating = stod(line.substr(comma + 1));
+    } catch (...) {
+        return false;
+    }
+    if (!movieName.empty() && movieName.front() == '\"') {
+        movieName = movieName.substr(1, movieName.size() - 2);
     }
     return true;
 }
