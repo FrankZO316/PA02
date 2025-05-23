@@ -72,24 +72,25 @@ int main(int argc, char** argv) {
     // First pass: Process matches and collect best movies
    for (const string& prefix : prefixes) {
     vector<Movie> matches;
+    // ... (find matches using lower/upper bounds)
 
     if (matches.empty()) {
-        cout << "No movies found with prefix " << prefix << endl;
+        cout << "No movies found with prefix " << prefix << endl; 
     } else {
         // Print matches
         for (const Movie& m : matches) {
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
         }
         // Find and print best movie
-        auto best_it = max_element(matches.begin(), matches.end(), 
+        auto best_it = max_element(matches.begin(), matches.end(),
             [](const Movie& a, const Movie& b) {
                 return (a.rating < b.rating) || (a.rating == b.rating && a.name > b.name);
             });
         cout << "Best movie with prefix " << prefix << " is: " 
              << best_it->name << " with rating " << best_it->rating << endl;
+        
+        cout << endl; // Blank line AFTER best movie (only if matches exist)
     }
-    
-    cout << endl;  
 }
 
     return 0;
