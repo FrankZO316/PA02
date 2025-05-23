@@ -109,6 +109,7 @@ int main(int argc, char** argv) {
                  << bestMovies[i].name << " with rating " 
                  << fixed << setprecision(1) << bestMovies[i].rating << endl;
         }
+        cout << endl;
     }
 
     return 0;
