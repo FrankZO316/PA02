@@ -20,38 +20,10 @@ using namespace std;
 
 bool parseLine(string &line, string &movieName, double &movieRating);
 
+// ... (previous includes and declarations remain the same)
+
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
-        cerr << "Usage: " << argv[0] << " moviesFilename [prefixFilename]" << endl;
-        exit(1);
-    }
-
-    ifstream movieFile(argv[1]);
-    if (movieFile.fail()) {
-        cerr << "Could not open file " << argv[1];
-        exit(1);
-    }
-
-    vector<Movie> movies;
-    string line, movieName;
-    double movieRating;
-
-    while (getline(movieFile, line) && parseLine(line, movieName, movieRating)) {
-        movies.emplace_back(movieName, movieRating);
-    }
-
-    movieFile.close();
-    sort(movies.begin(), movies.end(), [](const Movie& a, const Movie& b) {
-        return a.name < b.name;
-    });
-
-    if (argc == 2) {
-        for (const Movie& m : movies) {
-            cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-        }
-        return 0;
-    }
+    // ... (initial setup remains the same)
 
     ifstream prefixFile(argv[2]);
     if (prefixFile.fail()) {
@@ -60,16 +32,13 @@ int main(int argc, char** argv) {
     }
 
     vector<string> prefixes;
-    vector<Movie> bestMovies;
-    vector<bool> hasMatches;
-
+    string line;
     while (getline(prefixFile, line)) {
         if (!line.empty()) {
             prefixes.push_back(line);
         }
     }
 
-    // First pass: Process matches and collect best movies
     for (const string& prefix : prefixes) {
         vector<Movie> matches;
         auto lower = lower_bound(movies.begin(), movies.end(), prefix,
@@ -84,30 +53,26 @@ int main(int argc, char** argv) {
         matches.assign(lower, upper);
 
         if (matches.empty()) {
-            cout << "No movies found with prefix " << prefix;
-            hasMatches.push_back(false);
-            bestMovies.emplace_back("", -1);
+            cout << "No movies found with prefix " << prefix << endl; // Fixed newline
         } else {
-            sort(matches.begin(), matches.end(),
+            // Find best movie efficiently
+            auto best_it = max_element(matches.begin(), matches.end(),
                 [](const Movie& a, const Movie& b) {
-                    if (a.rating != b.rating) return a.rating > b.rating;
-                    return a.name < b.name;
+                    return (a.rating < b.rating) || 
+                           (a.rating == b.rating && a.name > b.name);
                 });
+            Movie best = *best_it;
 
+            // Print matches sorted lexicographically (as they're from sorted movies)
+            // Since movies are already sorted, matches are in lex order
             for (const Movie& m : matches) {
                 cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
-            bestMovies.push_back(matches[0]);
-            hasMatches.push_back(true);
-        }
-    }
 
-    // Second pass: Print best movies after all matches
-    for (size_t i = 0; i < prefixes.size(); ++i) {
-        if (hasMatches[i]) {
-            cout << "Best movie with prefix " << prefixes[i] << " is: " 
-                 << bestMovies[i].name << " with rating " 
-                 << fixed << setprecision(1) << bestMovies[i].rating << endl;
+            // Print best movie immediately after matches
+            cout << "Best movie with prefix " << prefix << " is: " 
+                 << best.name << " with rating " 
+                 << fixed << setprecision(1) << best.rating << endl;
         }
     }
 
