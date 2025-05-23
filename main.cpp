@@ -60,13 +60,16 @@ int main(int argc, char** argv) {
     }
 
     vector<string> prefixes;
+    vector<Movie> bestMovies;
+    vector<bool> hasMatches;
+
     while (getline(prefixFile, line)) {
         if (!line.empty()) {
             prefixes.push_back(line);
         }
     }
 
-    // Process each prefix in order
+    // First pass: Process matches and collect best movies
     for (const string& prefix : prefixes) {
         vector<Movie> matches;
         auto lower = lower_bound(movies.begin(), movies.end(), prefix,
@@ -82,23 +85,29 @@ int main(int argc, char** argv) {
 
         if (matches.empty()) {
             cout << "No movies found with prefix " << prefix << endl;
+            hasMatches.push_back(false);
+            bestMovies.emplace_back("", -1);
         } else {
-            // Sort matches by rating (desc) and name (asc)
             sort(matches.begin(), matches.end(),
                 [](const Movie& a, const Movie& b) {
                     if (a.rating != b.rating) return a.rating > b.rating;
                     return a.name < b.name;
                 });
 
-            // Print all matches
             for (const Movie& m : matches) {
                 cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
+            bestMovies.push_back(matches[0]);
+            hasMatches.push_back(true);
+        }
+    }
 
-            // Print best movie immediately after matches for this prefix
-            cout << "Best movie with prefix " << prefix << " is: " 
-                 << matches[0].name << " with rating " 
-                 << fixed << setprecision(1) << matches[0].rating << endl;
+    // Second pass: Print best movies after all matches
+    for (size_t i = 0; i < prefixes.size(); ++i) {
+        if (hasMatches[i]) {
+            cout << "Best movie with prefix " << prefixes[i] << " is: " 
+                 << bestMovies[i].name << " with rating " 
+                 << fixed << setprecision(1) << bestMovies[i].rating << endl;
         }
     }
 
@@ -130,7 +139,7 @@ for output and highest-rated movie selection. Space usage is kept
 linear with input size, acceptable for large datasets.*/
 
 bool parseLine(string &line, string &movieName, double &movieRating) {
-    size_t comma = line.find_last_of(',');
+       size_t comma = line.find_last_of(',');
     if (comma == string::npos) return false;
     movieName = line.substr(0, comma);
     try {
@@ -142,4 +151,5 @@ bool parseLine(string &line, string &movieName, double &movieRating) {
         movieName = movieName.substr(1, movieName.size() - 2);
     }
     return true;
+
 }
