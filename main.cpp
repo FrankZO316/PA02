@@ -70,47 +70,27 @@ int main(int argc, char** argv) {
     }
 
     // First pass: Process matches and collect best movies
-    for (const string& prefix : prefixes) {
-        vector<Movie> matches;
-        auto lower = lower_bound(movies.begin(), movies.end(), prefix,
-            [](const Movie& m, const string& p) {
-                return m.name.compare(0, p.length(), p) < 0;
-            });
-        auto upper = upper_bound(movies.begin(), movies.end(), prefix,
-            [](const string& p, const Movie& m) {
-                return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
-            });
+   for (const string& prefix : prefixes) {
+    vector<Movie> matches;
 
-        matches.assign(lower, upper);
-
-        if (matches.empty()) {
-            cout << "No movies found with prefix " << prefix << endl;
-            hasMatches.push_back(false);
-            bestMovies.emplace_back("", -1);
-        } else {
-            sort(matches.begin(), matches.end(),
-                [](const Movie& a, const Movie& b) {
-                    if (a.rating != b.rating) return a.rating > b.rating;
-                    return a.name < b.name;
-                });
-
-            for (const Movie& m : matches) {
-                cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-            }
-            bestMovies.push_back(matches[0]);
-            hasMatches.push_back(true);
+    if (matches.empty()) {
+        cout << "No movies found with prefix " << prefix << endl;
+    } else {
+        // Print matches
+        for (const Movie& m : matches) {
+            cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
         }
+        // Find and print best movie
+        auto best_it = max_element(matches.begin(), matches.end(), 
+            [](const Movie& a, const Movie& b) {
+                return (a.rating < b.rating) || (a.rating == b.rating && a.name > b.name);
+            });
+        cout << "Best movie with prefix " << prefix << " is: " 
+             << best_it->name << " with rating " << best_it->rating << endl;
     }
-
-    // Second pass: Print best movies after all matches
-    for (size_t i = 0; i < prefixes.size(); ++i) {
-        if (hasMatches[i]) {
-            cout << "Best movie with prefix " << prefixes[i] << " is: " 
-                 << bestMovies[i].name << " with rating " 
-                 << fixed << setprecision(1) << bestMovies[i].rating << endl;
-        }
-        cout << endl;
-    }
+    
+    cout << endl;  
+}
 
     return 0;
 }
