@@ -72,6 +72,8 @@ int main(int argc, char** argv) {
     
 for (const string& prefix : prefixes) {
     vector<Movie> matches;
+    
+    // 1. Find prefix range with CORRECT comparators
     auto lower = lower_bound(movies.begin(), movies.end(), prefix,
         [](const Movie& m, const string& p) {
             return m.name.substr(0, p.length()) < p;
@@ -80,24 +82,31 @@ for (const string& prefix : prefixes) {
         [](const string& p, const Movie& m) {
             return p < m.name.substr(0, p.length());
         });
-
     matches.assign(lower, upper);
 
     if (matches.empty()) {
-        cout << "No movies found with prefix " << prefix << endl;
+        cout << "No movies found with prefix " << prefix << endl; 
     } else {
+    
         for (const Movie& m : matches) {
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
         }
-        auto best_it = max_element(matches.begin(), matches.end(),
+        
+        
+        auto best = max_element(matches.begin(), matches.end(),
             [](const Movie& a, const Movie& b) {
-                return (a.rating < b.rating) || (a.rating == b.rating && a.name > b.name);
+                return (a.rating < b.rating) || 
+                       (a.rating == b.rating && a.name > b.name);
             });
+        
+    
         cout << "Best movie with prefix " << prefix << " is: " 
-             << best_it->name << " with rating " << best_it->rating << endl;
-        cout << endl; // Blank line after best movie
+             << best->name << " with rating " << best->rating << endl;
+        
+       
+        cout << endl; 
     }
-} // Blank line AFTER best movie (only if matches exist)
+} 
 
     return 0;
 }
