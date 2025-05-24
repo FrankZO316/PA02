@@ -79,25 +79,24 @@ int main(int argc, char** argv) {
 
         matches.assign(lower, upper);
 
-        if (matches.empty()) {
-            cout << "No movies found with prefix " << prefix << endl;
-        } else {
-            for (const Movie& m : matches) {
-                cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-            }
+    if (!matches.empty()) {
+    for (const Movie& m : matches) {
+        cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
+    }
 
-            Movie best = matches[0];
-            for (const Movie& m : matches) {
-                if (m.rating > best.rating || 
-                   (m.rating == best.rating && m.name < best.name)) {
-                    best = m;
-                }
-            }
-
-            cout << "Best movie with prefix " << prefix << " is "
-                 << best.name << " with rating " << best.rating << endl;
-            cout << endl;
+    Movie best = matches[0];
+    for (const Movie& m : matches) {
+        if (m.rating > best.rating || 
+            (m.rating == best.rating && m.name < best.name)) {
+            best = m;
         }
+    }
+
+    cout << "Best movie with prefix " << prefix << " is "
+         << best.name << " with rating " << best.rating << endl;
+    cout << endl;
+}
+
     }
 
     return 0;
