@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            cout << "Best movie with prefix " << prefix << " is: "
+            cout << "Best movie with prefix " << prefix << " is "
                  << best.name << " with rating " << best.rating << endl;
             cout << endl;
         }
