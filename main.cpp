@@ -73,38 +73,38 @@ int main(int argc, char** argv) {
 for (const string& prefix : prefixes) {
     vector<Movie> matches;
     
-    // Find prefix range
+    // Find prefix range using binary search
     auto lower = lower_bound(movies.begin(), movies.end(), prefix,
         [](const Movie& m, const string& p) {
-            return m.name.substr(0, p.length()) < p;
+            return m.name.compare(0, p.length(), p) < 0;
         });
     auto upper = upper_bound(movies.begin(), movies.end(), prefix,
         [](const string& p, const Movie& m) {
-            return p < m.name.substr(0, p.length());
+            return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
         });
     matches.assign(lower, upper);
 
     if (matches.empty()) {
         cout << "No movies found with prefix " << prefix << endl;
     } else {
-        // 1. Print matches in original order
+        // Print matches in original order
         for (const Movie& m : matches) {
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
         }
         
-        // 2. Find best movie (highest rating, then earliest in original order)
+        // Find best movie (highest rating, first occurrence for ties)
         Movie best = matches[0];
-        for (size_t i = 1; i < matches.size(); ++i) {
-            if (matches[i].rating > best.rating) {
-                best = matches[i];
+        for (const Movie& m : matches) {
+            if (m.rating > best.rating) {
+                best = m;
             }
         }
         
-        // 3. Print best movie line
-        cout << "Best movie with prefix " << prefix << " is: " 
+        // Print best movie line
+        cout << "Best movie with prefix " << prefix << " is: "
              << best.name << " with rating " << best.rating << endl;
         
-        // 4. Add required blank line
+        // Required blank line after prefix group
         cout << endl;
     }
 } 
