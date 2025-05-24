@@ -60,54 +60,45 @@ int main(int argc, char** argv) {
     }
 
     vector<string> prefixes;
-    vector<Movie> bestMovies;
-    vector<bool> hasMatches;
-
     while (getline(prefixFile, line)) {
         if (!line.empty()) {
             prefixes.push_back(line);
         }
     }
 
-    
-for (const string& prefix : prefixes) {
-    vector<Movie> matches;
-    
-    // Find prefix range using binary search
-    auto lower = lower_bound(movies.begin(), movies.end(), prefix,
-        [](const Movie& m, const string& p) {
-            return m.name.compare(0, p.length(), p) < 0;
-        });
-    auto upper = upper_bound(movies.begin(), movies.end(), prefix,
-        [](const string& p, const Movie& m) {
-            return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
-        });
-    matches.assign(lower, upper);
+    for (const string& prefix : prefixes) {
+        vector<Movie> matches;
+        auto lower = lower_bound(movies.begin(), movies.end(), prefix,
+            [](const Movie& m, const string& p) {
+                return m.name.compare(0, p.length(), p) < 0;
+            });
+        auto upper = upper_bound(movies.begin(), movies.end(), prefix,
+            [](const string& p, const Movie& m) {
+                return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
+            });
 
-    if (matches.empty()) {
-        cout << "No movies found with prefix " << prefix << endl;
-    } else {
-        // Print matches in original order
-        for (const Movie& m : matches) {
-            cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-        }
-        
-        // Find best movie (highest rating, first occurrence for ties)
-        Movie best = matches[0];
-        for (const Movie& m : matches) {
-            if (m.rating > best.rating) {
-                best = m;
+        matches.assign(lower, upper);
+
+        if (matches.empty()) {
+            cout << "No movies found with prefix " << prefix << endl;
+        } else {
+            for (const Movie& m : matches) {
+                cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
             }
+
+            Movie best = matches[0];
+            for (const Movie& m : matches) {
+                if (m.rating > best.rating || 
+                   (m.rating == best.rating && m.name < best.name)) {
+                    best = m;
+                }
+            }
+
+            cout << "Best movie with prefix " << prefix << " is: "
+                 << best.name << " with rating " << best.rating << endl;
+            cout << endl;
         }
-        
-        // Print best movie line
-        cout << "Best movie with prefix " << prefix << " is: "
-             << best.name << " with rating " << best.rating << endl;
-        
-        // Required blank line after prefix group
-        cout << endl;
     }
-} 
 
     return 0;
 }
@@ -137,7 +128,7 @@ for output and highest-rated movie selection. Space usage is kept
 linear with input size, acceptable for large datasets.*/
 
 bool parseLine(string &line, string &movieName, double &movieRating) {
-       size_t comma = line.find_last_of(',');
+         size_t comma = line.find_last_of(',');
     if (comma == string::npos) return false;
     movieName = line.substr(0, comma);
     try {
@@ -149,5 +140,4 @@ bool parseLine(string &line, string &movieName, double &movieRating) {
         movieName = movieName.substr(1, movieName.size() - 2);
     }
     return true;
-
 }
