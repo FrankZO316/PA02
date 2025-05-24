@@ -87,16 +87,15 @@ for (const string& prefix : prefixes) {
     if (matches.empty()) {
         cout << "No movies found with prefix " << prefix << endl;
     } else {
-        // 1. Print matches in original order (no sorting)
+        // 1. Print matches in original order
         for (const Movie& m : matches) {
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
         }
         
-        // 2. Find best movie manually to maintain order
+        // 2. Find best movie (highest rating, then earliest in original order)
         Movie best = matches[0];
         for (size_t i = 1; i < matches.size(); ++i) {
-            if (matches[i].rating > best.rating || 
-               (matches[i].rating == best.rating && matches[i].name < best.name)) {
+            if (matches[i].rating > best.rating) {
                 best = matches[i];
             }
         }
