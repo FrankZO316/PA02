@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 for (const string& prefix : prefixes) {
     vector<Movie> matches;
     
-    // Find prefix range with precise comparators
+    // Find prefix range
     auto lower = lower_bound(movies.begin(), movies.end(), prefix,
         [](const Movie& m, const string& p) {
             return m.name.substr(0, p.length()) < p;
@@ -87,17 +87,17 @@ for (const string& prefix : prefixes) {
     if (matches.empty()) {
         cout << "No movies found with prefix " << prefix << endl;
     } else {
-        // 1. Print matches in EXACT original order (no additional sorting)
+        // 1. Print matches in original order (no sorting)
         for (const Movie& m : matches) {
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
         }
         
-        // 2. Find best movie (highest rating, then lex order)
-        auto best = matches[0];
-        for (const Movie& m : matches) {
-            if (m.rating > best.rating || 
-               (m.rating == best.rating && m.name < best.name)) {
-                best = m;
+        // 2. Find best movie manually to maintain order
+        Movie best = matches[0];
+        for (size_t i = 1; i < matches.size(); ++i) {
+            if (matches[i].rating > best.rating || 
+               (matches[i].rating == best.rating && matches[i].name < best.name)) {
+                best = matches[i];
             }
         }
         
@@ -105,7 +105,7 @@ for (const string& prefix : prefixes) {
         cout << "Best movie with prefix " << prefix << " is: " 
              << best.name << " with rating " << best.rating << endl;
         
-        // 4. Add EXACTLY one blank line after each prefix group
+        // 4. Add required blank line
         cout << endl;
     }
 } 
