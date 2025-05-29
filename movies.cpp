@@ -47,10 +47,16 @@ void MovieDatabase::buildPrefixIndex() const {
 void MovieDatabase::printMoviesForPrefix(const string& prefix) const {
     auto it = prefixMap.find(prefix);
     if (it == prefixMap.end() || it->second.empty()) {
-        cout << "No movies found with prefix " << prefix << endl;
+        cout << "No movies found with prefix " << prefix;
         return;
     }
-    
+    bool first = true;
+    for (const auto& movie : it->second) {
+        if (!first) cout << endl; 
+        cout << movie.second << ", " << fixed << setprecision(1) << movie.first;
+        first = false;
+    }
+
     for (const auto& movie : it->second) {
         cout << movie.second << ", " << fixed << setprecision(1) << movie.first << endl;
     }
@@ -69,7 +75,7 @@ void MovieDatabase::processPrefixQueries(const vector<string>& prefixes) const {
     if (prefixMap.empty()) {
         buildPrefixIndex();
     }
-    
+    bool firstPrefix = true;
     for (const auto& prefix : prefixes) {
         printMoviesForPrefix(prefix);  
         printBestMovieForPrefix(prefix);
