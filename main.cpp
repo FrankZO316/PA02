@@ -19,6 +19,7 @@ using namespace std;
 
 bool parseLine(string &line, string &movieName, double &movieRating);
 
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
@@ -93,7 +94,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            cout << "Best movie with prefix " << prefix << " is "
+            cout << "Best movie with prefix " << prefix << " is: "
                  << best.name << " with rating " << best.rating << endl;
             cout << endl;
         }
@@ -127,7 +128,7 @@ for output and highest-rated movie selection. Space usage is kept
 linear with input size, acceptable for large datasets.*/
 
 bool parseLine(string &line, string &movieName, double &movieRating) {
-         size_t comma = line.find_last_of(',');
+    size_t comma = line.find_last_of(',');
     if (comma == string::npos) return false;
     movieName = line.substr(0, comma);
     try {
