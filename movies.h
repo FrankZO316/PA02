@@ -18,8 +18,8 @@ private:
     mutable std::map<std::string, std::pair<std::string, double>> bestMovieCache;
     
     void buildPrefixIndex() const;
-    bool printMoviesForPrefix(const std::string& prefix) const;  // Changed to bool
+    void printMoviesForPrefix(const std::string& prefix) const;  // Changed back to void
     void printBestMovieForPrefix(const std::string& prefix) const;
 };
 
-#endif
+#endif 
