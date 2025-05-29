@@ -1,24 +1,25 @@
 #ifndef MOVIES_H
 #define MOVIES_H
 
-#include <string>
 #include <vector>
+#include <string>
+#include <map>
+#include <utility> // for pair
 
-struct Movie {
-    std::string name;
-    double rating;
-};
-
-class Movies {
+class MovieDatabase {
 public:
-    void addMovie(const std::string& name, double rating);
-    void sortMovies();
-    std::vector<Movie> getMoviesByPrefix(const std::string& prefix) const;
-    Movie findBestMovie(const std::string& prefix) const;
-    const std::vector<Movie>& getMoviesList() const;
+    void insertMovie(const std::string& name, double rating);
+    void printAllAlphabetically() const;
+    void processPrefixQueries(const std::vector<std::string>& prefixes) const;
 
 private:
-    std::vector<Movie> movies;
+    std::vector<std::pair<std::string, double>> movies;
+    mutable std::map<std::string, std::vector<std::pair<double, std::string>>> prefixMap;
+    mutable std::map<std::string, std::pair<std::string, double>> bestMovieCache;
+    
+    void buildPrefixIndex() const;
+    void printMoviesForPrefix(const std::string& prefix) const;
+    void printBestMovieForPrefix(const std::string& prefix) const;
 };
 
 #endif 

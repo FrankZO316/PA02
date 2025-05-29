@@ -19,86 +19,51 @@ using namespace std;
 
 bool parseLine(string &line, string &movieName, double &movieRating);
 
-
-int main(int argc, char** argv) {
-    if (argc < 2) {
+int main(int argc, char** argv){
+    if (argc < 2){
         cerr << "Not enough arguments provided (need at least 1 argument)." << endl;
-        cerr << "Usage: " << argv[0] << " moviesFilename [prefixFilename]" << endl;
+        cerr << "Usage: " << argv[ 0 ] << " moviesFilename prefixFilename " << endl;
         exit(1);
     }
 
-    ifstream movieFile(argv[1]);
-    if (movieFile.fail()) {
+    ifstream movieFile (argv[1]);
+ 
+    if (movieFile.fail()){
         cerr << "Could not open file " << argv[1];
         exit(1);
     }
+  
+    MovieDatabase movieDB; 
 
-    vector<Movie> movies;
     string line, movieName;
     double movieRating;
-
-    while (getline(movieFile, line) && parseLine(line, movieName, movieRating)) {
-        movies.emplace_back(movieName, movieRating);
+   
+    while (getline (movieFile, line) && parseLine(line, movieName, movieRating)){
+        movieDB.insertMovie(movieName, movieRating);  
     }
 
     movieFile.close();
-    sort(movies.begin(), movies.end(), [](const Movie& a, const Movie& b) {
-        return a.name < b.name;
-    });
 
-    if (argc == 2) {
-        for (const Movie& m : movies) {
-            cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-        }
+    if (argc == 2){
+        movieDB.printAllAlphabetically();  
         return 0;
     }
 
-    ifstream prefixFile(argv[2]);
+    ifstream prefixFile (argv[2]);
+
     if (prefixFile.fail()) {
         cerr << "Could not open file " << argv[2];
         exit(1);
     }
 
     vector<string> prefixes;
-    while (getline(prefixFile, line)) {
+    while (getline (prefixFile, line)) {
         if (!line.empty()) {
             prefixes.push_back(line);
         }
     }
 
-    for (const string& prefix : prefixes) {
-        vector<Movie> matches;
-        auto lower = lower_bound(movies.begin(), movies.end(), prefix,
-            [](const Movie& m, const string& p) {
-                return m.name.compare(0, p.length(), p) < 0;
-            });
-        auto upper = upper_bound(movies.begin(), movies.end(), prefix,
-            [](const string& p, const Movie& m) {
-                return p.compare(0, p.length(), m.name.substr(0, p.length())) < 0;
-            });
-
-        matches.assign(lower, upper);
-
-        if (matches.empty()) {
-            cout << "No movies found with prefix " << prefix << endl;
-        } else {
-            for (const Movie& m : matches) {
-                cout << m.name << ", " << fixed << setprecision(1) << m.rating << endl;
-            }
-
-            Movie best = matches[0];
-            for (const Movie& m : matches) {
-                if (m.rating > best.rating || 
-                   (m.rating == best.rating && m.name < best.name)) {
-                    best = m;
-                }
-            }
-
-            cout << "Best movie with prefix " << prefix << " is: "
-                 << best.name << " with rating " << best.rating << endl;
-            cout << endl;
-        }
-    }
+    movieDB.processPrefixQueries(prefixes);
 
     return 0;
 }
@@ -128,16 +93,11 @@ for output and highest-rated movie selection. Space usage is kept
 linear with input size, acceptable for large datasets.*/
 
 bool parseLine(string &line, string &movieName, double &movieRating) {
-    size_t comma = line.find_last_of(',');
-    if (comma == string::npos) return false;
-    movieName = line.substr(0, comma);
-    try {
-        movieRating = stod(line.substr(comma + 1));
-    } catch (...) {
-        return false;
-    }
-    if (!movieName.empty() && movieName.front() == '\"') {
-        movieName = movieName.substr(1, movieName.size() - 2);
+   int commaIndex = line.find_last_of(",");
+    movieName = line.substr(0, commaIndex);
+    movieRating = stod(line.substr(commaIndex+1));
+    if (movieName[0] == '\"') {
+        movieName = movieName.substr(1, movieName.length() - 2);
     }
     return true;
 }

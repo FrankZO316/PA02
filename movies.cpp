@@ -1,42 +1,77 @@
 #include "movies.h"
 #include <algorithm>
+#include <iostream>
+#include <iomanip>
 
-void Movies::addMovie(const std::string& name, double rating) {
-    movies.push_back({name, rating});
+using namespace std;
+
+void MovieDatabase::insertMovie(const string& name, double rating) {
+    movies.emplace_back(name, rating);
 }
 
-void Movies::sortMovies() {
-    std::sort(movies.begin(), movies.end(), [](const Movie& a, const Movie& b) {
-        return a.name < b.name;
-    });
-}
-
-std::vector<Movie> Movies::getMoviesByPrefix(const std::string& prefix) const {
-    std::vector<Movie> result;
- 
-    auto lower = std::lower_bound(movies.begin(), movies.end(), prefix,
-        [](const Movie& m, const std::string& p) {
-            return m.name.compare(0, p.size(), p) < 0;
-        });
-    auto upper = std::upper_bound(movies.begin(), movies.end(), prefix,
-        [](const std::string& p, const Movie& m) {
-            return p.compare(0, p.size(), m.name.substr(0, p.size())) < 0;
-        });
-    result.assign(lower, upper);
-    return result;
-}
-
-Movie Movies::findBestMovie(const std::string& prefix) const {
-    auto matches = getMoviesByPrefix(prefix);
-    if (matches.empty()) return {"", -1.0};
+void MovieDatabase::printAllAlphabetically() const {
+    vector<pair<string, double>> sortedMovies = movies;
+    sort(sortedMovies.begin(), sortedMovies.end());
     
-    return *std::max_element(matches.begin(), matches.end(),
-        [](const Movie& a, const Movie& b) {
-            return (a.rating < b.rating) || 
-                   (a.rating == b.rating && a.name > b.name);
-        });
+    for (const auto& movie : sortedMovies) {
+        cout << movie.first << ", " << fixed << setprecision(1) << movie.second << endl;
+    }
 }
 
-const std::vector<Movie>& Movies::getMoviesList() const {
-    return movies;
+void MovieDatabase::buildPrefixIndex() const {
+    for (const auto& movie : movies) {
+        const string& name = movie.first;
+        double rating = movie.second;
+        
+       
+        for (size_t len = 1; len <= name.size(); len++) {
+            string prefix = name.substr(0, len);
+            prefixMap[prefix].emplace_back(rating, name);
+        }
+    }
+    
+    
+    for (auto& entry : prefixMap) {
+        auto& movieList = entry.second;
+        sort(movieList.begin(), movieList.end(), 
+            [](const auto& a, const auto& b) {
+                return a.first > b.first || (a.first == b.first && a.second < b.second);
+            });
+        
+        if (!movieList.empty()) {
+            bestMovieCache[entry.first] = {movieList[0].second, movieList[0].first};
+        }
+    }
+}
+
+void MovieDatabase::printMoviesForPrefix(const string& prefix) const {
+    auto it = prefixMap.find(prefix);
+    if (it == prefixMap.end() || it->second.empty()) {
+        cout << "No movies found with prefix " << prefix << endl;
+        return;
+    }
+    
+    for (const auto& movie : it->second) {
+        cout << movie.second << ", " << fixed << setprecision(1) << movie.first << endl;
+    }
+}
+
+void MovieDatabase::printBestMovieForPrefix(const string& prefix) const {
+    auto it = bestMovieCache.find(prefix);
+    if (it != bestMovieCache.end()) {
+        cout << "Best movie with prefix " << prefix << " is: " 
+             << it->second.first << " with rating " << fixed << setprecision(1) 
+             << it->second.second << endl;
+    }
+}
+
+void MovieDatabase::processPrefixQueries(const vector<string>& prefixes) const {
+    if (prefixMap.empty()) {
+        buildPrefixIndex();
+    }
+    
+    for (const auto& prefix : prefixes) {
+        printMoviesForPrefix(prefix);  
+        printBestMovieForPrefix(prefix);  
+    }
 }
