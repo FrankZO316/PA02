@@ -74,10 +74,11 @@ void MovieDatabase::processPrefixQueries(const vector<string>& prefixes) const {
     bool firstPrefix = true;
     for (const auto& prefix : prefixes) {
         if (!firstPrefix) cout << endl;
+        
         printMoviesForPrefix(prefix);
         
-        // Only print best movie if we found movies
-        if (prefixMap.count(prefix) && !prefixMap.at(prefix).empty()) {
+        auto it = prefixMap.find(prefix);
+        if (it != prefixMap.end() && !it->second.empty()) {
             printBestMovieForPrefix(prefix);
         }
         
