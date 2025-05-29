@@ -92,12 +92,3 @@ prefix lookups. Sorting the prefix subset ensures correct order
 for output and highest-rated movie selection. Space usage is kept 
 linear with input size, acceptable for large datasets.*/
 
-bool parseLine(string &line, string &movieName, double &movieRating) {
-   int commaIndex = line.find_last_of(",");
-    movieName = line.substr(0, commaIndex);
-    movieRating = stod(line.substr(commaIndex+1));
-    if (movieName[0] == '\"') {
-        movieName = movieName.substr(1, movieName.length() - 2);
-    }
-    return true;
-}
