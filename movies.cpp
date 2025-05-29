@@ -59,17 +59,22 @@ void MovieDatabase::processPrefixQueries(const vector<string>& prefixes) const {
         buildPrefixIndex();
     }
     
-    for (const auto& prefix : prefixes) {
-        printMoviesForPrefix(prefix);
+    
+    for (size_t i = 0; i < prefixes.size(); ++i) {
+        if (i > 0) cout << endl; 
+        printMoviesForPrefix(prefixes[i]);
     }
     
-    cout << endl; 
-    for (const auto& prefix : prefixes) {
-        auto it = bestMovieCache.find(prefix);
-        if (it != bestMovieCache.end()) {
-            cout << "Best movie with prefix " << prefix << " is: " 
-                 << it->second.first << " with rating " << fixed << setprecision(1) 
-                 << it->second.second << endl;
+   
+    if (!prefixes.empty()) {
+        cout << endl; 
+        for (const auto& prefix : prefixes) {
+            auto it = bestMovieCache.find(prefix);
+            if (it != bestMovieCache.end()) {
+                cout << "Best movie with prefix " << prefix << " is: " 
+                     << it->second.first << " with rating " << fixed << setprecision(1) 
+                     << it->second.second << endl;
+            }
         }
     }
 }
