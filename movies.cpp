@@ -23,13 +23,11 @@ void MovieDatabase::buildPrefixIndex() const {
         const string& name = movie.first;
         double rating = movie.second;
         
-       
         for (size_t len = 1; len <= name.size(); len++) {
             string prefix = name.substr(0, len);
             prefixMap[prefix].emplace_back(rating, name);
         }
     }
-    
     
     for (auto& entry : prefixMap) {
         auto& movieList = entry.second;
@@ -44,22 +42,20 @@ void MovieDatabase::buildPrefixIndex() const {
     }
 }
 
-void MovieDatabase::printMoviesForPrefix(const string& prefix) const {
+bool MovieDatabase::printMoviesForPrefix(const string& prefix) const {
     auto it = prefixMap.find(prefix);
     if (it == prefixMap.end() || it->second.empty()) {
         cout << "No movies found with prefix " << prefix;
-        return;
+        return false;
     }
+    
     bool first = true;
     for (const auto& movie : it->second) {
-        if (!first) cout << endl; 
+        if (!first) cout << endl;
         cout << movie.second << ", " << fixed << setprecision(1) << movie.first;
         first = false;
     }
-
-    for (const auto& movie : it->second) {
-        cout << movie.second << ", " << fixed << setprecision(1) << movie.first << endl;
-    }
+    return true;
 }
 
 void MovieDatabase::printBestMovieForPrefix(const string& prefix) const {
@@ -75,10 +71,17 @@ void MovieDatabase::processPrefixQueries(const vector<string>& prefixes) const {
     if (prefixMap.empty()) {
         buildPrefixIndex();
     }
+    
     bool firstPrefix = true;
     for (const auto& prefix : prefixes) {
-        printMoviesForPrefix(prefix);  
-        printBestMovieForPrefix(prefix);
-        cout << endl;  
+        if (!firstPrefix) cout << endl;
+        
+        bool hasMovies = printMoviesForPrefix(prefix);
+        if (hasMovies) {
+            cout << endl;
+            printBestMovieForPrefix(prefix);
+        }
+        
+        firstPrefix = false;
     }
 }
