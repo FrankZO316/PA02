@@ -61,7 +61,7 @@ void MovieDatabase::printBestMovieForPrefix(const string& prefix) const {
     if (it != bestMovieCache.end()) {
         cout << "Best movie with prefix " << prefix << " is: " 
              << it->second.first << " with rating " << fixed << setprecision(1) 
-             << it->second.second << endl;
+             << it->second.second;
     }
 }
 
@@ -72,6 +72,7 @@ void MovieDatabase::processPrefixQueries(const vector<string>& prefixes) const {
     
     for (const auto& prefix : prefixes) {
         printMoviesForPrefix(prefix);  
-        printBestMovieForPrefix(prefix);  
+        printBestMovieForPrefix(prefix);
+        cout << endl;  
     }
 }
